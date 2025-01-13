@@ -10,7 +10,8 @@ namespace TestBlade.ConsoleRunner.Audio;
 /// </summary>
 public class AudioPlayer : ISoundPlayer, IDisposable
 {
-    private LibVLC _libVlc;
+    // Should only have one LibVLC instance in your app
+    private static readonly LibVLC s_libVlc = new();
 
     private MediaPlayer? _player;
     private Media? _media;
@@ -31,7 +32,6 @@ public class AudioPlayer : ISoundPlayer, IDisposable
     public AudioPlayer(bool loopPlayback = false)
     {
         LoopPlayback = loopPlayback;
-        _libVlc = new();
     }
 
     /// <summary>
@@ -43,16 +43,24 @@ public class AudioPlayer : ISoundPlayer, IDisposable
 
         if (_player != null)
         {
-            _player.Dispose();
+            _media.Dispose();
+            // _player.Dispose() never comes back. I don't know why.
+            // Will this thread hang around forever? Do I care? I know not.
+            ThreadPool.QueueUserWorkItem((x) => 
+            {
+                _player.Dispose();
+                 _player = null;
+            });
         }
 
-        _player = new MediaPlayer(_libVlc) { EnableHardwareDecoding = true };
-        _media = new Media(_libVlc, fileName, FromType.FromPath);
+        _player = new MediaPlayer(s_libVlc) { EnableHardwareDecoding = true };
+        _media = new Media(s_libVlc, fileName, FromType.FromPath);
         _player.EndReached += (sender, args) => 
         {
             OnPlaybackComplete?.Invoke();
             if (this.LoopPlayback)
             {
+                // Must be in a separate thread or it might crash
                 ThreadPool.QueueUserWorkItem((x) => 
                 {
                     _player.Stop();
