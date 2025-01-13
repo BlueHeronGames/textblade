@@ -14,6 +14,7 @@ public class AudioPlayer : ISoundPlayer, IDisposable
 
     private MediaPlayer? _player;
     private Media? _media;
+    private bool _isDisposed = false;
 
     /// <summary>
     /// An event that fires when playback automatically completes.
@@ -76,7 +77,18 @@ public class AudioPlayer : ISoundPlayer, IDisposable
     /// <summary>
     /// Stops audio playback.
     /// </summary>
-    public void Stop() => _player?.Stop();
+    public void Stop()
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+        
+        if (_player != null && _player.IsPlaying)
+        {
+            _player?.Stop();
+        }
+    }
 
     public bool IsPlaying
     {
@@ -93,6 +105,13 @@ public class AudioPlayer : ISoundPlayer, IDisposable
 
     public void Dispose()
     {
+        if (_isDisposed)
+        {
+            // Double dispose causes a crash
+            return;
+        }
+
+        _isDisposed = true;
         _player?.Dispose();
         _media?.Dispose();
     }
