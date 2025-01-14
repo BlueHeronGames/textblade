@@ -46,7 +46,7 @@ public class ItemShop : Location
 
     public override string GetExtraMenuOptions()
     {
-        return "Type \"B item number\" to buy that item.";
+        return "Type B to buy something.";
     }
 
     public override ICommand GetCommandFor(string input)
