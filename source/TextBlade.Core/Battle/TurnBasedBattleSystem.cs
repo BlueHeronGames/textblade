@@ -133,7 +133,7 @@ public class TurnBasedBattleSystem : IBattleSystem
 
         while (!isBattleOver())
         {
-            var monstersStatus = string.Join(", ", _monsters.Select(m => $"{m.Name}: {m.CurrentHealth}/{m.TotalHealth} health"));
+            var monstersStatus = string.Join(", ", _monsters.Where(m => m.CurrentHealth > 0).Select(m => $"{m.Name}: {m.CurrentHealth}/{m.TotalHealth} health"));
             _console.WriteLine($"You face: [{Colours.Highlight}]{monstersStatus}[/]");
             var partyStatus = string.Join(", ", _saveData.Party);
             _console.WriteLine($"Your party: [{Colours.Highlight}]{partyStatus}[/]");
