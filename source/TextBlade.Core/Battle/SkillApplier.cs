@@ -29,17 +29,13 @@ public class SkillApplier
         
         ArgumentNullException.ThrowIfNull(target);
         float damage = 0;
-        var hitWeakness = false;
 
         if (user.GetType() != target.GetType())
         {
-            var totalStrength = user is Character character ? character.TotalStrength : user.Strength;
-            damage = (totalStrength - target.Toughness) * skill.DamageMultiplier;
-            if (target is Monster m && m.Weakness == skill.DamageType)
+            damage = AttackExecutor.CalculateBaseDamage(user, target) * skill.DamageMultiplier;
+            if (target is Monster m)
             {
-                // Targeting their weakness? 2x damage!
-                damage *= 2;
-                hitWeakness = true;
+                damage = AttackExecutor.BoostDamageIfDamageTypesMatch(damage, skill.DamageType, m);
             }
         }
         else if (user.GetType() == target.GetType())
@@ -51,14 +47,17 @@ public class SkillApplier
 
         var roundedDamage = (int)damage;
         target.Damage(roundedDamage);
-        // TODO: DRY the 2x damage part with CharacterTurnProcessor
         var damageMessage = damage > 0 ? $"{roundedDamage} damage" : $"healed for [green]{-roundedDamage}[/]";
-        var effectiveMessage = hitWeakness ? "[#f80]Super effective![/]" : "";
+        var effectiveMessage = AttackExecutor.IsSuperEffective(skill.DamageType, target as Monster) ? "[#f80]Super effective![/]" : string.Empty;
 
-        var finalMessage = ($"{user.Name} uses [#faa]{skill.Name} on {target.Name}[/]!");
+        var finalMessage = $"{user.Name} uses [#faa]{skill.Name} on {target.Name}[/]!";
         if (damage != 0)
         {
             finalMessage = $"{finalMessage} {effectiveMessage} {damageMessage}!";
+        }
+        if (target.CurrentHealth <= 0)
+        {
+            finalMessage = $"{finalMessage} {target.Name} DIES!";
         }
         _console.WriteLine(finalMessage);
     }
