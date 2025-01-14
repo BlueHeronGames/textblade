@@ -74,6 +74,20 @@ public class SkillApplier
         var stacks = skill.StatusStacks;
         target.InflictStatus(status, stacks);
 
-        _console.WriteLine($"{user.Name} inflicts [{Colours.Highlight}]{skill.StatusInflicted} x{skill.StatusStacks}[/] on {target.Name}!");
+        string statusColour = Colours.Highlight;
+        switch (status)
+        {
+            case "Burn":
+                statusColour = Colours.Fire;
+                break;
+            case "Poison":
+                statusColour = Colours.Poison;
+                break;
+            case "Paralyze":
+                statusColour = Colours.Paralyze;
+                break;
+        }
+
+        _console.WriteLine($"{user.Name} inflicts [{statusColour}]{skill.StatusInflicted} x{skill.StatusStacks}[/] on {target.Name}!");
     }
 }
