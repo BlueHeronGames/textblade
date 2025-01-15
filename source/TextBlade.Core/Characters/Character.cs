@@ -108,4 +108,9 @@ public class Character : Entity
     {
         return $"{this.Name}: {this.CurrentHealth}/{this.TotalHealth} health, {this.CurrentSkillPoints}/{this.TotalSkillPoints} skill points";
     }
+
+    public string GetStats()
+    {
+        return $"{Strength} strength, {Toughness} toughness, {Special} special, {SpecialDefense} special defense";
+    }
 }

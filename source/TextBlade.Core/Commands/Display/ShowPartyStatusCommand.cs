@@ -14,6 +14,7 @@ public class ShowPartyStatusCommand : ICommand
             var equipment = string.Join(", ", member.Equipment.Values.Select(e => $"{e.Name}: {e}"));
 
             console.WriteLine($"    {member}");
+            console.WriteLine($"        Stats: {member.GetStats()}");
             console.WriteLine($"        Equipment: {(string.IsNullOrWhiteSpace(equipment) ? "nothing" : equipment)}");
         }
 
