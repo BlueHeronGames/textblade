@@ -133,10 +133,8 @@ public class TurnBasedBattleSystem : IBattleSystem
 
         while (!isBattleOver())
         {
-            var monstersStatus = string.Join(", ", _monsters.Where(m => m.CurrentHealth > 0).Select(m => $"{m.Name}: {m.CurrentHealth}/{m.TotalHealth} health"));
-            _console.WriteLine($"You face: [{Colours.Highlight}]{monstersStatus}[/]");
-            var partyStatus = string.Join(", ", _saveData.Party);
-            _console.WriteLine($"Your party: [{Colours.Highlight}]{partyStatus}[/]");
+            ShowMonsterStats();
+            ShowCharacterStats();
 
             foreach (var character in _saveData.Party)
             {
@@ -161,6 +159,10 @@ public class TurnBasedBattleSystem : IBattleSystem
                 {
                     isProcessed = characterTurnProcessor.ProcessTurnFor(character);
                 }
+
+                // User request: tell me statuses again after each turn
+                ShowMonsterStats();
+
             }
 
             // If they're not done by here, stop and clear the queue.
@@ -237,5 +239,17 @@ public class TurnBasedBattleSystem : IBattleSystem
 
             e.OnRoundComplete(_console);
         }
+    }
+
+    private void ShowCharacterStats()
+    {
+        var partyStatus = string.Join(", ", _saveData.Party);
+        _console.WriteLine($"Your party: [{Colours.Highlight}]{partyStatus}[/]");
+    }
+
+    private void ShowMonsterStats()
+    {
+        var monstersStatus = string.Join(", ", _monsters.Where(m => m.CurrentHealth > 0).Select(m => $"{m.Name}: {m.CurrentHealth}/{m.TotalHealth} health"));
+        _console.WriteLine($"You face: [{Colours.Highlight}]{monstersStatus}[/]");
     }
 }
