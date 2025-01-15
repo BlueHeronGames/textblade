@@ -21,7 +21,13 @@ internal class AttackExecutor
 
     public static bool IsSuperEffective(string attackType, Monster targetMonster)
     {
-       return attackType  == targetMonster.Weakness;
+        if (targetMonster == null)
+        {
+            // It's not a monster. It's a character.
+            return false;
+        }
+
+        return attackType  == targetMonster.Weakness;
     }
 
     /// <summary>
