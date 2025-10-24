@@ -210,10 +210,15 @@ public class Dungeon : Location
         }
 
         // Obvious, innit? If the current floor is clear, you auto-grabbed the loot already.
-        OnVictory();
+        ClearFloorAndSetSwitch();
     }
 
     public void OnVictory()
+    {
+        ClearFloorAndSetSwitch();
+    }
+
+    private void ClearFloorAndSetSwitch()
     {
         _floorMonsters[_currentFloorNumber].Clear();
         if (_currentFloorNumber >= _floorMonsters.Count - 1)

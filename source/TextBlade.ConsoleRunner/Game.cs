@@ -189,7 +189,7 @@ public class Game : IGame
 
         foreach (var sound in _currentLocation.BackgroundAudios)
         {
-            PlayAudioFor(sound);
+            PlayBackgroundAudio(sound);
         }
     }
 
@@ -296,7 +296,7 @@ public class Game : IGame
 
         if (!string.IsNullOrWhiteSpace(_currentLocation?.BackgroundAudio))
         {
-            PlayAudioFor(_currentLocation.BackgroundAudio);
+            PlayBackgroundAudio(_currentLocation.BackgroundAudio);
             return;
         }
 
@@ -318,14 +318,14 @@ public class Game : IGame
             _backgroundAudiosPlayers.Clear();
             foreach (var audio in audios)
             {
-                PlayAudioFor(audio);
+                PlayBackgroundAudio(audio);
             }
         }        
     }
 
-    private void PlayAudioFor(string audioFile)
+    private void PlayBackgroundAudio(string audioFile)
     {   
-        var audioPlayer = new AudioPlayer();
+        var audioPlayer = new AudioPlayer(true);
         audioPlayer.Play(Path.Join("Content", "Audio", $"{audioFile}.ogg"));
         audioPlayer.Volume = BackgroundAudioVolume;
         _backgroundAudiosPlayers.Add(audioPlayer);
