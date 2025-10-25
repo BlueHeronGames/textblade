@@ -4,4 +4,4 @@
 
 Blind-friendly JRPG game and engine. Includes a prototype game. Built in .NET 8.0.
 
-Anything related to **TextBlade** is the generic framework or game engine for making text-based RPGs. Anything related to **VoidWalker** is my current prototype game.
+Anything related to **TextBlade** is the generic framework or game engine for making text-based RPGs. Anything related to **VoidWalker** is sample game content. 
