@@ -14,11 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-
-    - name: Setup libVLC
-      run: |
-        sudo apt install libvlc-dev
-        sudo apt install vlc
     
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
