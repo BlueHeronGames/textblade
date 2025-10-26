@@ -1,5 +1,5 @@
-using LibVLCSharp.Shared;
-using TextBlade.ConsoleRunner.Audio;
+using NAudio.Vorbis;
+using NAudio.Wave;
 using TextBlade.Core.Audio;
 
 namespace TestBlade.ConsoleRunner.Audio;
@@ -10,11 +10,8 @@ namespace TestBlade.ConsoleRunner.Audio;
 /// </summary>
 public class AudioPlayer : ISoundPlayer, IDisposable
 {
-    // Should only have one LibVLC instance in your app
-    private static readonly LibVLC s_libVlc = new();
-
-    private MediaPlayer? _player;
-    private Media? _media;
+    private WaveStream? _reader;
+    private WaveOutEvent? _waveOut;
     private bool _isDisposed = false;
 
     /// <summary>
@@ -41,45 +38,54 @@ public class AudioPlayer : ISoundPlayer, IDisposable
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
 
-        if (_player != null)
+        if (_reader != null)
         {
-            _media.Dispose();
-            // _player.Dispose() never comes back. I don't know why.
-            // Will this thread hang around forever? Do I care? I know not.
-            ThreadPool.QueueUserWorkItem((x) => 
-            {
-                _player.Dispose();
-                 _player = null;
-            });
+            _waveOut?.Stop();
+            _waveOut?.Dispose();
+            _reader?.Dispose();
         }
 
-        _player = new MediaPlayer(s_libVlc) { EnableHardwareDecoding = true };
-        _media = new Media(s_libVlc, fileName, FromType.FromPath);
-        _player.EndReached += (sender, args) => 
+        var fileExtension = Path.GetExtension(fileName).Replace(".", "").ToLower();
+        switch (fileExtension)
         {
+            case "ogg":
+                _reader = new VorbisWaveReader(fileName);
+                break;
+            case "wav":
+                _reader = new WaveFileReader(fileName);
+                break;
+            default:
+                throw new ArgumentException($"Not sure how to play {fileExtension} files");
+        }
+
+        _waveOut = new WaveOutEvent();
+        _waveOut.Init(_reader);
+        _waveOut.PlaybackStopped += (sender, stoppedArgs) => 
+        {
+            if (stoppedArgs.Exception != null)
+            {
+                throw stoppedArgs.Exception;
+            }
+
             OnPlaybackComplete?.Invoke();
+
             if (this.LoopPlayback)
             {
-                // Must be in a separate thread or it might crash
-                ThreadPool.QueueUserWorkItem((x) => 
-                {
-                    _player.Stop();
-                    _player.Play();
-                });
+                _reader.Position = 0;
+                _waveOut.Play();
             }
         };
-
-        _player.SetChannel(channel.ToAudioOutputChannel());
-        _player.Play(_media);
+        
+        _waveOut.Play();
     }
 
     /// <summary>
-    /// Volume to play back at; 0 is silent and 100 is maximum volume.
+    /// Volume to play back at; 0 is silent and 1.0 is maximum volume.
     /// </summary>
-    public int Volume
+    public float Volume
     {
-        get { return _player.Volume; }
-        set { _player.Volume = value; }
+        get { return _waveOut?.Volume ?? 0; }
+        set { if (_waveOut != null) _waveOut.Volume = value; }
     }
     
     /// <summary>
@@ -92,19 +98,16 @@ public class AudioPlayer : ISoundPlayer, IDisposable
             return;
         }
         
-        if (_player != null && _player.IsPlaying)
-        {
-            _player?.Stop();
-        }
+        _waveOut?.Stop();
     }
 
     public bool IsPlaying
     {
         get
         {
-            if (_player != null)
+            if (_waveOut != null)
             {
-                return _player.IsPlaying;
+                return _waveOut.PlaybackState == PlaybackState.Playing;
             }
             
             return false;
@@ -120,7 +123,7 @@ public class AudioPlayer : ISoundPlayer, IDisposable
         }
 
         _isDisposed = true;
-        _player?.Dispose();
-        _media?.Dispose();
+        _waveOut?.Dispose();
+        _reader?.Dispose();
     }
 }

@@ -16,12 +16,12 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="LibVLCSharp" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="NAudio" />
+    <PackageReference Include="NAudio.Vorbis" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Spectre.Console" />
     <PackageReference Include="System.Windows.Extensions" />
-    <PackageReference Include="VideoLAN.LibVLC.Windows" />
   </ItemGroup>
 
   <ItemGroup>

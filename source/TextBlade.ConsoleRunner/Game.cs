@@ -22,7 +22,7 @@ public class Game : IGame
     public static IGame Current { get; private set; } = null!;
 
     private const int AutoSaveIntervalMinutes = 1;
-    private const int BackgroundAudioVolume = 65;
+    private const float BackgroundAudioVolume = 0.30f;
 
     protected SaveData _saveData = new();
     protected Location? _currentLocation;
