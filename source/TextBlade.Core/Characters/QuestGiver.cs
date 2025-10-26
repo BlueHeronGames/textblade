@@ -1,4 +1,5 @@
 using TextBlade.Core.Game;
+using TextBlade.Core.Game.Actions;
 
 namespace TextBlade.Core.Characters;
 
@@ -19,6 +20,12 @@ public class QuestGiver : Npc
     {
         PostQuestTexts = postQuestTexts;
         QuestCompleteSwitchName = questCompleteSwitchName;
+        
+        // Auto-set OnTalk to set TalkedTo_ switch if not already provided
+        if (OnTalk == null)
+        {
+            OnTalk = new SetSwitchAction(GameSwitches.GetTalkedToSwitchForQuestGiver(name), true);
+        }
     }
 
     public override string Speak()
@@ -30,11 +37,7 @@ public class QuestGiver : Npc
             return message;
         }
 
-        var toReturn = base.Speak();
-        if (!GameSwitches.Switches.Has(GameSwitches.GetTalkedToSwitchForQuestGiver(this.Name)))
-        {
-            GameSwitches.Switches.Set(GameSwitches.GetTalkedToSwitchForQuestGiver(this.Name), true);
-        }
-        return toReturn;
+        // Call base.Speak() which will handle OnTalk execution
+        return base.Speak();
     }
 }

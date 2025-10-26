@@ -41,7 +41,14 @@ Anything related to Void Walkers is content for the sample game.
 
 ## Quick Start
 
-The fastest way to get started is to look at the **VoidWalker** sample game in `source/VoidWalker.Main/`. It demonstrates all the core features of TextBlade.
+The fastest way to get started is to look at the **VoidWalker** sample game in `source/VoidWalker.Main/`. It demonstrates all the core features of TextBlade, including:
+
+- Quest givers with pre/post-quest dialogue
+- Switches and OnTalk actions for quest flow
+- Dungeons with procedurally generated monsters
+- Shops (equipment and items)
+- Skills and status effects
+- Audio integration
 
 To run VoidWalker:
 
@@ -49,6 +56,12 @@ To run VoidWalker:
 cd source\VoidWalker.Main
 dotnet run
 ```
+
+**Key Files to Explore**:
+- `Content/Locations/KingsVale/ThroneRoom.json` - Quest giver with OnTalk action
+- `Content/Locations/KingsVale/KingsVale.json` - Location with switch-gated dungeon entrance
+- `Content/Dungeons/NorthSeasideCave.json` - Dungeon configuration
+- `Content/Data/` - Items, monsters, skills, and statuses
 
 ---
 
@@ -343,6 +356,41 @@ Quest givers have different dialogue before and after quest completion:
 
 **Automatic Switch**: Talking to a quest giver sets `TalkedTo_{QuestGiverName}` (e.g., `TalkedTo_KingSulayman`)
 
+#### Custom Switch Actions (OnTalk)
+
+You can set custom switches when NPCs are talked to using the `OnTalk` action:
+
+```json
+{
+    "Name": "Retired Hero",
+    "Texts": ["Some helpful advice..."],
+    "OnTalk": {
+        "$type": "TextBlade.Core.Game.Actions.SetSwitchAction, TextBlade.Core",
+        "SwitchName": "MetRetiredHero",
+        "Value": true
+    }
+}
+```
+
+This works for both regular NPCs and Quest Givers. Quest Givers automatically set their `TalkedTo_` switch unless you override `OnTalk`. You can also explicitly set the switch in JSON:
+
+```json
+{
+    "$type": "TextBlade.Core.Characters.QuestGiver, TextBlade.Core",
+    "Name": "King Sulayman",
+    "Texts": ["Please clear the cave!"],
+    "PostQuestTexts": ["Thank you!"],
+    "QuestCompleteSwitchName": "CompletedDungeon_Cave",
+    "OnTalk": {
+        "$type": "TextBlade.Core.Game.Actions.SetSwitchAction, TextBlade.Core",
+        "SwitchName": "TalkedTo_KingSulayman",
+        "Value": true
+    }
+}
+```
+
+The `OnTalk` action executes only once, the first time you talk to the NPC.
+
 ### Items & Equipment
 
 Define items in `Content/Data/Items.json`:
@@ -555,6 +603,45 @@ GameSwitches.Switches["CustomEvent"] = true;
 ```
 
 This exit only appears if the switch is true.
+
+### VoidWalker Example: Quest Flow with OnTalk Actions
+
+The VoidWalker sample game demonstrates a complete quest flow using switches and OnTalk actions:
+
+**1. King Sulayman's Quest** (`ThroneRoom.json`):
+```json
+{
+    "$type": "TextBlade.Core.Characters.QuestGiver, TextBlade.Core",
+    "Name": "King Sulayman",
+    "Texts": ["Please clear the monsters from the cave!"],
+    "PostQuestTexts": ["Thank you for your service!"],
+    "QuestCompleteSwitchName": "CompletedDungeon_NorthSeasideCave",
+    "OnTalk": {
+        "$type": "TextBlade.Core.Game.Actions.SetSwitchAction, TextBlade.Core",
+        "SwitchName": "TalkedTo_KingSulayman",
+        "Value": true
+    }
+}
+```
+
+**2. Cave Unlocks After Talking** (`KingsVale.json`):
+```json
+"LinkedLocations": [
+    {
+        "Id": "Dungeons/NorthSeasideCave",
+        "Description": "Explore the North Seaside Cave",
+        "SwitchRequired": "TalkedTo_KingSulayman"
+    }
+]
+```
+
+**How it works**:
+1. Player talks to King Sulayman → `TalkedTo_KingSulayman` switch is set to `true`
+2. Cave entrance appears in King's Vale (because switch requirement is met)
+3. Player clears the cave → `CompletedDungeon_NorthSeasideCave` is set automatically
+4. King Sulayman shows `PostQuestTexts` (because quest complete switch is true)
+
+This pattern lets you create complex quest chains entirely in JSON without writing any code!
 
 ---
 

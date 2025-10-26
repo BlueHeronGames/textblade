@@ -10,7 +10,12 @@
             "Name": "King Sulayman",
             "Texts": [ "Peace! Are you an adventurer? Please, you must kill the monsters in the Seaside cave, before they attack again! You can find it due north of here." ],
             "PostQuestTexts": [ "Thank you for clearing the cave of monsters! We are ever in your debt." ],
-            "QuestCompleteSwitchName": "CompletedDungeon_NorthSeasideCave"
+            "QuestCompleteSwitchName": "CompletedDungeon_NorthSeasideCave",
+            "OnTalk": {
+                "$type": "TextBlade.Core.Game.Actions.SetSwitchAction, TextBlade.Core",
+                "SwitchName": "TalkedTo_KingSulayman",
+                "Value": true
+            }
         }
     ]
 }

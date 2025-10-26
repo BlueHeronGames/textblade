@@ -25,7 +25,12 @@
             "Name": "Retired Hero",
             "Texts": [
                 "Setting forth for adventure? Remember this well: monsters have different weaknesses. Some are weak against fire. Others, like the common goblin, are weak against swords."
-            ]
+            ],
+            "OnTalk": {
+                "$type": "TextBlade.Core.Game.Actions.SetSwitchAction, TextBlade.Core",
+                "SwitchName": "MetRetiredHero",
+                "Value": true
+            }
         }
     ]
 }
